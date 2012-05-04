@@ -3,7 +3,8 @@
   <head>
     <title>Force-Directed Game</title>
 		<script type="text/javascript" src="lib/d3.v2.min.js"></script>
-    <script type="text/javascript" src="lib/jwerty.js"></script>
+		<script type="text/javascript" src="force.js"></script>
+    <script type="text/javascript" src="lib/zepto.js"></script>
     <style type="text/css">
 rect {
   fill: #fff;
@@ -27,14 +28,14 @@ rect {
     <div id="chart"></div>
     <script type="text/javascript">
 
-var w = 960,
-    h = 500,
+var w = $(window).width(),
+    h = $(window).height(),
 		r = 6,
     fill = d3.scale.category20(),
 		players = 2,
     nodes = [{x:50,
 			 y:h/2}],
-		tolerance = w/3,
+		tolerance = w/5,
     links = [],
 		foci = [{x:150, y:250}, {x:600, y:250}];
 			
@@ -55,34 +56,19 @@ var cursors = vis.selectAll("circle.cursor")
 			.attr("r", 30)
 	 		.attr("cx", function(d) {return d.x;})
 			.attr("cy", function(d) {return d.y;}) 
-			.attr("class", "cursor")
-			.on("click", function(obj, c) {
-				if (d3.select(this).classed("selected")) {
-					unbindMouse(this);
-					d3.select(this).classed("selected", false);
-				} else {
-					bindMouse(this);
-					d3.select(this).attr("class", "selected");
-				}
-			});
+			.attr("class", "cursor");
 
-
-force.on("tick", function(e) {
-  // Push nodes toward closest cursor
-  var k = .2 * e.alpha,
-			u = 1;
-  nodes.forEach(function(o, i) {
-	  if (Math.abs(o.y - cursors.data()[0].y) < tolerance &&
-			Math.abs(o.x - cursors.data()[0].x) < tolerance) {
-			u = 0;
+cursors.each(function() {
+	var c = this;
+	$(c).on("click", function() {
+		if ($.inArray("selected", $(this).attr("class").split(" ")) == 1) {
+			unbindMouse();	
+			$(".cursor").attr("class", "cursor");
+		} else {
+			$(this).attr("class", "cursor selected");
+			bindMouse(c);
 		}
-    o.y += (cursors.data()[u].y - o.y) * k;
-    o.x += (cursors.data()[u].x - o.x) * k;
-  });
-	
-  vis.selectAll("circle.node")
-      .attr("cx", function(d) { return d.x = Math.max(r, Math.min(w - r, d.x)); })
-      .attr("cy", function(d) { return d.y = Math.max(r, Math.min(w - r, d.y)); });
+	});
 });
 
 var bindMouse = function(el) {
@@ -95,9 +81,32 @@ var bindMouse = function(el) {
 	});
 }
 
-var unbindMouse = function(el) {
+var unbindMouse = function() {
 	vis.on("mousemove", null);
 }
+
+force.on("tick", function(e) {
+  // Push nodes toward closest cursor
+  var k = .2 * e.alpha,
+			u = 1;
+  nodes.forEach(function(o, i) {
+		var y1 = Math.abs(o.y - cursors.data()[0].y),
+				x1 = Math.abs(o.x - cursors.data()[0].x),
+				y2 = Math.abs(o.y - cursors.data()[1].y),
+				x2 = Math.abs(o.x - cursors.data()[1].x);
+	  if (y1 < tolerance && x1 < tolerance &&
+			y1 < y2 && x1 < x2) {
+			u = 0;
+		}
+    o.y += (cursors.data()[u].y - o.y) * k;
+    o.x += (cursors.data()[u].x - o.x) * k;
+  });
+	
+  vis.selectAll("circle.node")
+      .attr("cx", function(d) { return d.x = Math.max(r, Math.min(w - r, d.x)); })
+      .attr("cy", function(d) { return d.y = Math.max(r, Math.min(w - r, d.y)); });
+});
+
 
 restart();
 

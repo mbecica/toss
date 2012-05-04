@@ -29,11 +29,12 @@ rect {
 
 var w = 960,
     h = 500,
+		r = 6,
     fill = d3.scale.category20(),
 		players = 2,
     nodes = [{x:50,
 			 y:h/2}],
-		tolerance = 100,
+		tolerance = w/3,
     links = [],
 		foci = [{x:150, y:250}, {x:600, y:250}];
 			
@@ -80,8 +81,8 @@ force.on("tick", function(e) {
   });
 	
   vis.selectAll("circle.node")
-      .attr("cx", function(d) { return d.x; })
-      .attr("cy", function(d) { return d.y; });
+      .attr("cx", function(d) { return d.x = Math.max(r, Math.min(w - r, d.x)); })
+      .attr("cy", function(d) { return d.y = Math.max(r, Math.min(w - r, d.y)); });
 });
 
 var bindMouse = function(el) {

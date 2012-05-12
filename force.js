@@ -1,13 +1,13 @@
 // A rudimentary force layout using Gauss-Seidel.
-d3.layout.force = function() {
+force = function() {
   var force = {},
-      event = d3.dispatch("start", "tick", "end"),
+      //event = d3.dispatch("start", "tick", "end"),
       size = [1, 1],
       drag,
       alpha,
       friction = .9,
-      linkDistance = d3_layout_forceLinkDistance,
-      linkStrength = d3_layout_forceLinkStrength,
+      //linkDistance = d3_layout_forceLinkDistance,
+      //linkStrength = d3_layout_forceLinkStrength,
       charge = -30,
       gravity = .1,
       theta = .8,
@@ -45,10 +45,12 @@ d3.layout.force = function() {
 
   force.tick = function() {
     // simulated annealing, basically
+		/*
     if ((alpha *= .99) < .005) {
       event.end({type: "end", alpha: alpha = 0});
       return true;
     }
+		*/
 
     var n = nodes.length,
         m = links.length,
@@ -62,6 +64,7 @@ d3.layout.force = function() {
         x, // x-distance
         y; // y-distance
 
+		/*
     // gauss-seidel relaxation for links
     for (i = 0; i < m; ++i) {
       o = links[i];
@@ -79,6 +82,7 @@ d3.layout.force = function() {
         s.y += y * k;
       }
     }
+		*/
 
     // apply gravity forces
     if (k = alpha * gravity) {
@@ -92,7 +96,7 @@ d3.layout.force = function() {
     }
 
     // compute quadtree center of mass and apply charge forces
-    if (charge) {
+/*    if (charge) {
       d3_layout_forceAccumulate(q = d3.geom.quadtree(nodes), alpha, charges);
       i = -1; while (++i < n) {
         if (!(o = nodes[i]).fixed) {
@@ -100,7 +104,7 @@ d3.layout.force = function() {
         }
       }
     }
-
+*/
     // position verlet integration
     i = -1; while (++i < n) {
       o = nodes[i];
@@ -271,7 +275,8 @@ d3.layout.force = function() {
   };
 
   // use `node.call(force.drag)` to make nodes draggable
-  force.drag = function() {
+/*
+	force.drag = function() {
     if (!drag) drag = d3.behavior.drag()
         .origin(d3.identity)
         .on("dragstart", dragstart)
@@ -287,7 +292,7 @@ d3.layout.force = function() {
     d3_layout_forceDragOver(d3_layout_forceDragNode = d);
     d3_layout_forceDragForce = force;
   }
-
+*/
   return d3.rebind(force, event, "on");
 };
 

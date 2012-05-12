@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<head>
+<title>Some Physics</title>
+<script type="text/javascript" src="lib/zepto.js"></script>
+<style>
+body {
+margin:0;
+}
+</style>
+</head>
+<body>
+<script type="text/javascript">
+var width  = window.innerWidth,
+		height = window.innerHeight;
+
+$('body').append("<canvas width=" + width + " height= " + height + "></canvas>")
+
+var canvas = $('canvas')[0],
+		ctx = canvas.getContext('2d');
+
+var size = [1,1],
+		interval = 40,
+		alpha = 1.8,
+		gravity = .1,
+		friction = 1,
+		charge = -30,
+		charges,
+		down = true,
+		right = true,
+		last = Date.now(),
+		o = o || {x: 20, y: 20, v: {x:30, y:30}, a: {t: 1.2, x:0, y:0}},
+		c = c || {x: 50, y: 250};
+
+$(document).mousemove(function(e) {
+	c.x = e.pageX;
+	c.y = e.pageY;
+});
+	// shim layer with setTimeout fallback
+	window.requestAnimFrame = (function(){
+  	return	window.requestAnimationFrame       || 
+            window.webkitRequestAnimationFrame || 
+            window.mozRequestAnimationFrame    || 
+            window.oRequestAnimationFrame      || 
+            window.msRequestAnimationFrame     || 
+            function( callback ){
+              window.setTimeout(callback, 1000 / 60);
+            };
+	})();
+
+window.force = {
+	repulse : function(node) {
+		//repulse here
+	},
+	render : function() {
+		//Gravity
+		if (o.y >= canvas.height || o.y > c.y) {
+			down = false;
+		} 
+		if (o.y < 15 || o.y <= c.y) {
+			down = true;
+		}
+		if (o.x >= canvas.width || o.x > c.x) {
+			right = false;
+		}
+		if (o.x < 15 || o.x <= c.x) {
+			right = true;
+		}
+		var dy = (c.y-o.y)*(c.y-o.y),
+				dx = (c.x-o.x)*(c.x-o.x),
+				d = dy + dx;
+		o.a.t = -100000/d;
+		o.a.x = d/dx; //current going to NaN
+		o.a.y = d/dy; //current going to NaN
+
+		if (down && (c.y-o.y != 0)) {
+			o.v.y += o.a.y * 1/interval;
+			o.y += o.v.y * 1/interval;
+		} else {
+			o.v.y -= o.a.y * 1/interval;
+			o.y -= o.v.y * 1/interval;
+		}
+		if (right && (c.x-o.x != 0)) {
+			o.v.x += o.a.x * 1/interval;
+			o.x += o.v.x * 1/interval;
+		} else {
+			o.v.x -= o.a.x * 1/interval;
+			o.x -= o.v.x * 1/interval;
+		}
+		
+		//draw a circle
+		force.clear();
+		force.renderCursor();
+		ctx.beginPath();
+		ctx.fillStyle = 'rgba(56,74,114, .8)';
+		ctx.arc(o.x, o.y, 20, 0, 2*Math.PI, true);
+		ctx.fill();
+	},
+	renderCursor: function() {
+		ctx.beginPath();
+		ctx.fillStyle = '#eee';
+		ctx.arc(c.x, c.y, 40, 0, 2*Math.PI, true);
+		ctx.fill();
+	},
+	clear: function() {
+		// Store the current transformation matrix
+		ctx.save();
+
+		// Use the identity matrix while clearing the canvas
+		ctx.setTransform(1, 0, 0, 1, 0, 0);
+		ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+		// Restore the transform
+		ctx.restore();
+	},
+	loop : function() {
+		requestAnimFrame(force.loop);
+		if (Date.now() - last < interval) return;
+    last = Date.now();
+    force.render();
+	}
+}
+</script>

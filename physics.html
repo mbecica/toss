@@ -29,7 +29,8 @@ var size = [1,1],
 		right = true,
 		last = Date.now(),
 		o = o || {x: 20, y: 20, v: {x:30, y:30}, a: {t: 1.2, x:0, y:0}},
-		c = c || {x: 50, y: 250};
+		c = c || {x: 50, y: 250},
+		stop = false;
 
 $(document).mousemove(function(e) {
 	c.x = e.pageX;
@@ -52,52 +53,46 @@ window.force = {
 		//repulse here
 	},
 	render : function() {
+		if (stop) return false;
 		//Gravity
 		if (o.y >= canvas.height || o.y > c.y) {
 			down = false;
 		} 
-		if (o.y < 15 || o.y <= c.y) {
+		if (o.y < 15) {
 			down = true;
 		}
 		if (o.x >= canvas.width || o.x > c.x) {
 			right = false;
 		}
-		if (o.x < 15 || o.x <= c.x) {
+		if (o.x < 15) {
 			right = true;
 		}
 		var dy = (c.y-o.y)*(c.y-o.y),
 				dx = (c.x-o.x)*(c.x-o.x),
-				d = dy + dx;
-		o.a.t = -100000/d;
-		o.a.x = d/dx; //current going to NaN
-		o.a.y = d/dy; //current going to NaN
+				d = dy + dx,
+				theta = Math.atan(dy/dx),
+				A = .01/d;
+		
+		o.a.x = A * Math.cos(theta);
+		o.a.y = A * Math.sin(theta);
 
-		if (down && (c.y-o.y != 0)) {
-			o.v.y += o.a.y * 1/interval;
-			o.y += o.v.y * 1/interval;
-		} else {
-			o.v.y -= o.a.y * 1/interval;
-			o.y -= o.v.y * 1/interval;
-		}
-		if (right && (c.x-o.x != 0)) {
-			o.v.x += o.a.x * 1/interval;
-			o.x += o.v.x * 1/interval;
-		} else {
-			o.v.x -= o.a.x * 1/interval;
-			o.x -= o.v.x * 1/interval;
-		}
+		o.v.y += o.a.y * 1/interval;
+		o.v.x += o.a.x * 1/interval;
+	
+		o.y += o.v.y * 1/interval;
+		o.x += o.v.x * 1/interval;
 		
 		//draw a circle
 		force.clear();
 		force.renderCursor();
 		ctx.beginPath();
-		ctx.fillStyle = 'rgba(56,74,114, .8)';
+		ctx.fillStyle = 'rgba(56,74,114, .5)';
 		ctx.arc(o.x, o.y, 20, 0, 2*Math.PI, true);
 		ctx.fill();
 	},
 	renderCursor: function() {
 		ctx.beginPath();
-		ctx.fillStyle = '#eee';
+		ctx.fillStyle = '#444';
 		ctx.arc(c.x, c.y, 40, 0, 2*Math.PI, true);
 		ctx.fill();
 	},
@@ -117,6 +112,9 @@ window.force = {
 		if (Date.now() - last < interval) return;
     last = Date.now();
     force.render();
+	},
+	stop: function() {
+		stop = true;	
 	}
 }
 </script>

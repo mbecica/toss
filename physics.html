@@ -25,8 +25,6 @@ var size = [1,1],
 		friction = 1,
 		charge = -30,
 		charges,
-		down = true,
-		right = true,
 		last = Date.now(),
 		o = o || {x: 20, y: 20, v: {x:30, y:30}, a: {t: 1.2, x:0, y:0}},
 		c = c || {x: 50, y: 250},
@@ -52,6 +50,9 @@ window.force = {
 	repulse : function(node) {
 		//repulse here
 	},
+	direction : function() {
+		
+	},
 	render : function() {
 		if (stop) return false;
 		//Gravity
@@ -71,10 +72,10 @@ window.force = {
 				dx = (c.x-o.x)*(c.x-o.x),
 				d = dy + dx,
 				theta = Math.atan(dy/dx),
-				A = .01/d;
+				A = 100000/d;
 		
-		o.a.x = A * Math.cos(theta);
-		o.a.y = A * Math.sin(theta);
+		o.a.x = A * Math.cos(theta) * (c.x-o.x > 0 ? 1 : -1);
+		o.a.y = A * Math.sin(theta) * (c.y-o.y > 0 ? 1 : -1);
 
 		o.v.y += o.a.y * 1/interval;
 		o.v.x += o.a.x * 1/interval;
